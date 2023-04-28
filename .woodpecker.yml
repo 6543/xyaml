@@ -1,12 +1,16 @@
 pipeline:
+  editor-config:
+    image: mstruebing/editorconfig-checker
+    group: lint
+
   test_1.15:
     image: golang:1.15
     group: test
     commands:
-      - go test ./...
+      - go test -race -coverprofile coverage_1.15.out ./...
 
   test_1.20:
     image: golang:1.20
     group: test
     commands:
-      - go test ./...
+      - go test -race -coverprofile coverage_1.20.out ./...
