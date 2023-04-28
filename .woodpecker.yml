@@ -1,3 +1,7 @@
+when:
+  - branch: main
+  - event: pull_request
+
 pipeline:
   editor-config:
     image: mstruebing/editorconfig-checker
