@@ -10,15 +10,13 @@
 </a>
 
 is a library to extend [`gopkg.in/yaml.v3`](https://github.com/go-yaml/yaml/tree/v3)
-to allow merging [sequences](https://github.com/yaml/yaml/issues/48) and [arrays](https://github.com/yaml/yaml/issues/35)
+to allow merging [sequences](https://github.com/yaml/yaml/issues/48)
 
 ## Features
 
 - [x] merge sequences
   - [x] single alias
   - [x] array of alias
-- [ ] merge maps
-  - [ ] overwrite maps
 
 ## How to use
 
@@ -47,7 +45,8 @@ array1: &my_array_alias
 
 array2:
 - <<: *my_array_alias
-- baz
+- NEW1
+- <<: [*my_array_alias, *my_array_alias]
 ```
 
 will be interpreted as:
@@ -60,5 +59,9 @@ array1:
 array2:
 - foo
 - bar
-- baz
+- NEW1
+- foo
+- bar
+- foo
+- bar
 ```

@@ -7,7 +7,6 @@
 package xyaml_test
 
 import (
-	"errors"
 	"math"
 	"reflect"
 	"testing"
@@ -110,18 +109,16 @@ func TestMergeSequenceErrors(t *testing.T) {
 		in: `array2:
 - <<: a, b
 - zap`,
-		errStg: "",
 		err:    xyaml.ErrSequenceMerge,
+		errStg: "sequence merge failed: merge map node did not contain an alias node",
 	}}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			node := new(yaml.Node)
 			err := xyaml.Unmarshal([]byte(tt.in), node)
-			if assert.Error(t, err) {
-				if assert.Truef(t, errors.Is(err, tt.err), "want: '%s' error, but got '%s' error", tt.err, err) && tt.errStg != "" {
-					assert.EqualValues(t, tt.errStg, err.Error())
-				}
+			if assert.ErrorIs(t, err, tt.err) && tt.errStg != "" {
+				assert.EqualValues(t, tt.errStg, err.Error())
 			}
 		})
 	}
@@ -146,7 +143,7 @@ func TestMergeMap(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			out := make(map[string]map[string]string)
-			assert.NoError(t, yaml.Unmarshal([]byte(tt.in), out))
+			assert.NoError(t, xyaml.Unmarshal([]byte(tt.in), out))
 			newData, err := xyaml.Marshal(out)
 			assert.NoError(t, err)
 			assert.EqualValues(t, tt.out, string(newData))
