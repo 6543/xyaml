@@ -12,11 +12,18 @@ import (
 
 // Unmarshal use underlying yaml.v3 lib func to decode and alter based on the extensions afterwards
 func Unmarshal(in []byte, out interface{}) (err error) {
+	// internal unmarshal
 	node := new(yaml.Node)
-	yaml.Unmarshal(in, node)
+	if err := yaml.Unmarshal(in, node); err != nil {
+		return err
+	}
 
-	// TODO: do add extensions
+	// process extensions
+	if err := mergeSequence(node, 0); err != nil {
+		return err
+	}
 
+	// unmarshal to final dest type
 	return node.Decode(out)
 }
 
@@ -24,3 +31,17 @@ func Unmarshal(in []byte, out interface{}) (err error) {
 func Marshal(in interface{}) (out []byte, err error) {
 	return yaml.Marshal(in)
 }
+
+// Source: https://github.com/go-yaml/yaml/blob/3e3283e801afc229479d5fc68aa41df1137b8394/resolve.go#L70-L81
+const (
+	// nullTag      = "!!null"
+	// boolTag      = "!!bool"
+	// intTag       = "!!int"
+	// floatTag     = "!!float"
+	// strTag       = "!!str"
+	// timestampTag = "!!timestamp"
+	// seqTag       = "!!seq"
+	// mapTag       = "!!map"
+	// binaryTag    = "!!binary"
+	mergeTag = "!!merge"
+)
