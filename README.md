@@ -53,7 +53,7 @@ array2:
 will be interpreted as:
 
 ```yml
-array1: &my_array_alias
+array1:
 - foo
 - bar
 

@@ -53,11 +53,10 @@ func TestStdDecode(t *testing.T) {
 }
 
 func TestMergeSequences(t *testing.T) {
+	// https://github.com/yaml/yaml/issues/48
 	tests := []struct {
 		name, in, out string
-		typ           interface{}
 	}{{
-		// https://github.com/yaml/yaml/issues/48
 		name: "merging a sequence",
 		in: `array1: &my_array_alias
 - foo
@@ -66,10 +65,8 @@ func TestMergeSequences(t *testing.T) {
 array2:
 - <<: *my_array_alias
 - zap`,
-		typ: make(map[string][]string),
 		out: "array1:\n    - foo\n    - bar\narray2:\n    - foo\n    - bar\n    - zap\n",
 	}, {
-		// https://github.com/yaml/yaml/issues/48
 		name: "merging two sequences",
 		in: `array1: &my_array_alias
 - foo
@@ -79,20 +76,29 @@ array2:
 - first
 - <<: [*my_array_alias, *my_array_alias]
 - zap`,
-		typ: make(map[string][]string),
 		out: "array1:\n    - foo\n    - bar\narray2:\n    - first\n    - foo\n    - bar\n    - foo\n    - bar\n    - zap\n",
+	}, {
+		name: "merge sequences independent",
+		in: `array1: &alias1
+- one
+- two
+result:
+- 1
+- <<: *alias1
+- 2
+- <<: *alias1
+`,
+		out: "array1:\n    - one\n    - two\nresult:\n    - \"1\"\n    - one\n    - two\n    - \"2\"\n    - one\n    - two\n",
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			assert.NoError(t, xyaml.Unmarshal([]byte(tt.in), tt.typ))
-			newData, err := xyaml.Marshal(tt.typ)
+			out := make(map[string][]string)
+			assert.NoError(t, xyaml.Unmarshal([]byte(tt.in), out))
+			newData, err := xyaml.Marshal(out)
 			assert.NoError(t, err)
 			assert.EqualValues(t, tt.out, string(newData))
 		})
 	}
-
-	// todo test: sequences that contain arrays with a merge
-	// <<: *my_array_alias, *my_array_alias
 }
 
 func TestMergeSequenceErrors(t *testing.T) {
@@ -117,6 +123,33 @@ func TestMergeSequenceErrors(t *testing.T) {
 					assert.EqualValues(t, tt.errStg, err.Error())
 				}
 			}
+		})
+	}
+}
+
+func TestMergeMap(t *testing.T) {
+	tests := []struct {
+		name, in, out string
+	}{{
+		name: "merge unique maps",
+		in:   "letters: &letters\n  a: \"A\"\nnumbers: &numbers\n  one: \"1\"\ncombined:\n  <<: [ *letters, *numbers ]",
+		out:  "combined:\n    a: A\n    one: \"1\"\nletters:\n    a: A\nnumbers:\n    one: \"1\"\n",
+	}, {
+		name: "extend maps",
+		in:   "base: &base\n  foo: FOO\n  bar: BAR\nextended:\n  <<: *base\n  zap: ZAP",
+		out:  "base:\n    bar: BAR\n    foo: FOO\nextended:\n    bar: BAR\n    foo: FOO\n    zap: ZAP\n",
+	}, {
+		name: "overwrite vales",
+		in:   "\nbase: &base\n  val: ONE\n  next: 1\n  zap: 3\noverwrite:\n  next: 2\n  <<: *base\n  val: TWO\n",
+		out:  "base:\n    next: \"1\"\n    val: ONE\n    zap: \"3\"\noverwrite:\n    next: \"2\"\n    val: TWO\n    zap: \"3\"\n",
+	}}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			out := make(map[string]map[string]string)
+			assert.NoError(t, yaml.Unmarshal([]byte(tt.in), out))
+			newData, err := xyaml.Marshal(out)
+			assert.NoError(t, err)
+			assert.EqualValues(t, tt.out, string(newData))
 		})
 	}
 }
