@@ -3,6 +3,12 @@ pipeline:
     image: mstruebing/editorconfig-checker
     group: lint
 
+  vet:
+    image: golang:1.20
+    group: lint
+    commands:
+      - go vet ./...
+
   test_1.15:
     image: golang:1.15
     group: test
