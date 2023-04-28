@@ -1,0 +1,12 @@
+pipeline:
+  test_1.15:
+    image: golang:1.15
+    group: test
+    commands:
+      - go test ./...
+
+  test_1.20:
+    image: golang:1.20
+    group: test
+    commands:
+      - go test ./...
