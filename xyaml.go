@@ -22,7 +22,7 @@ func Unmarshal(in []byte, out interface{}) (err error) {
 	}
 
 	// process extensions
-	if err := mergeSequence(node, 0); err != nil {
+	if err := mergeSequences(node, 0); err != nil {
 		return err
 	}
 
