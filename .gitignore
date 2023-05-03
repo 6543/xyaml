@@ -21,3 +21,8 @@ vendor/
 # Go workspace file
 go.work
 
+# Fuzzer
+corpus/
+crashers/
+suppressions/
+xyaml-fuzz.zip
