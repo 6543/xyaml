@@ -1,26 +1,27 @@
 when:
   - branch: main
+    event: push
   - event: pull_request
 
-pipeline:
+steps:
   editor-config:
     image: mstruebing/editorconfig-checker
-    group: lint
+    depends_on: []
 
   vet:
-    image: golang:1.20
-    group: lint
+    image: golang:1.26
+    depends_on: []
     commands:
       - go vet ./...
 
-  test_1.15:
-    image: golang:1.15
-    group: test
+  test_1.24:
+    image: golang:1.24
+    depends_on: [ vet ]
     commands:
       - go test -race -coverprofile coverage_1.15.out ./...
 
-  test_1.20:
-    image: golang:1.20
-    group: test
+  test_1.26:
+    image: golang:1.26
+    depends_on: [ vet ]
     commands:
       - go test -race -coverprofile coverage_1.20.out ./...
