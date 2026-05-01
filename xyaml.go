@@ -7,27 +7,27 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-// Source: https://github.com/go-yaml/yaml/blob/3e3283e801afc229479d5fc68aa41df1137b8394/resolve.go#L80
-const mergeTag = "!!merge"
+type Parser interface {
+	Unmarshal(in []byte, out any) (err error)
+	Marshal(in any) (out []byte, err error)
+	MergeSequences(in *yaml.Node) (err error)
+}
 
-// Unmarshal use underlying yaml.v3 lib func to decode and alter based on the extensions afterwards
-func Unmarshal(in []byte, out interface{}) (err error) {
-	// internal unmarshal
-	node := new(yaml.Node)
-	if err := yaml.Unmarshal(in, node); err != nil {
-		return err
-	}
+// DefaultParser uses default config,
+// can be overloaded to set new config for public functions.
+var DefaultParser = NewParser()
 
-	// process extensions
-	if err := mergeSequences(node, 0); err != nil {
-		return err
-	}
-
-	// unmarshal to final dest type
-	return node.Decode(out)
+// Unmarshal use underlying yaml.v3 lib func to decode and alter based on the extensions afterwards with default config
+func Unmarshal(in []byte, out any) (err error) {
+	return DefaultParser.Unmarshal(in, out)
 }
 
 // Marshal just use the normal underlying yaml.v3 lib func
-func Marshal(in interface{}) (out []byte, err error) {
-	return yaml.Marshal(in)
+func Marshal(in any) (out []byte, err error) {
+	return DefaultParser.Marshal(in)
+}
+
+// MergeSequences recursively search for sequence merge indicator "<<:" and merge if detected
+func MergeSequences(node *yaml.Node) error {
+	return DefaultParser.MergeSequences(node)
 }

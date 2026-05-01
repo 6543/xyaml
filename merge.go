@@ -10,7 +10,8 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-const maxDepth uint8 = 10
+// Source: https://github.com/go-yaml/yaml/blob/3e3283e801afc229479d5fc68aa41df1137b8394/resolve.go#L80
+const mergeTag = "!!merge"
 
 var (
 	// ErrMaxDepth indicates there is likely a loop that got caught
@@ -22,20 +23,15 @@ var (
 	ErrSequenceMerge = errors.New("sequence merge failed")
 )
 
-// MergeSequences recursively search for sequence merge indicator "<<:" and merge if detected
-func MergeSequences(node *yaml.Node) error {
-	return mergeSequences(node, 0)
-}
-
-func mergeSequences(node *yaml.Node, depth uint8) error {
+func (c config) mergeSequences(node *yaml.Node, depth uint16) error {
 	// prevent loop by hardcoded limit
-	if depth == maxDepth {
+	if depth == c.maxDepth {
 		return ErrMaxDepth
 	}
 
 	switch node.Kind {
 	case yaml.DocumentNode:
-		return mergeSequences(node.Content[0], depth+1)
+		return c.mergeSequences(node.Content[0], depth+1)
 
 	case yaml.MappingNode:
 		if (len(node.Content) % 2) != 0 {
@@ -43,7 +39,7 @@ func mergeSequences(node *yaml.Node, depth uint8) error {
 		}
 
 		for i := len(node.Content); i > 1; i = i - 2 {
-			if err := mergeSequences(node.Content[i-1], depth+1); err != nil {
+			if err := c.mergeSequences(node.Content[i-1], depth+1); err != nil {
 				return err
 			}
 		}
@@ -96,7 +92,7 @@ func mergeSequences(node *yaml.Node, depth uint8) error {
 				// we did not detect a merge tag
 
 				// else its just a normal sequence item we do process recursive
-				if err := mergeSequences(node.Content[i], depth+1); err != nil {
+				if err := c.mergeSequences(node.Content[i], depth+1); err != nil {
 					return err
 				}
 				// if there was a merge before we need to append it to the new content
