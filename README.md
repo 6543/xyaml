@@ -9,7 +9,7 @@
     <img alt="Get it on Codeberg" src="https://codeberg.org/Codeberg/GetItOnCodeberg/media/branch/main/get-it-on-neon-blue.png" height="60">
 </a>
 
-is a library to extend [`gopkg.in/yaml.v3`](https://github.com/go-yaml/yaml/tree/v3)
+is a library to extend [`go.yaml.in/yaml/v4`](https://github.com/yaml/go-yaml)
 to allow merging [sequences](https://github.com/yaml/yaml/issues/48)
 
 ## Features

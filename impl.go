@@ -3,7 +3,7 @@
 
 package xyaml
 
-import "gopkg.in/yaml.v3"
+import "go.yaml.in/yaml/v4"
 
 type config struct {
 	maxDepth uint16
