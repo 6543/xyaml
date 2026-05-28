@@ -1,4 +1,4 @@
-module codeberg.org/6543/xyaml
+module codeberg.org/6543/xyaml/v2
 
 go 1.24
 
