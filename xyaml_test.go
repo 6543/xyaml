@@ -8,7 +8,7 @@ import (
 	"reflect"
 	"testing"
 
-	"codeberg.org/6543/xyaml"
+	"codeberg.org/6543/xyaml/v2"
 	"github.com/stretchr/testify/assert"
 	"go.yaml.in/yaml/v4"
 )
